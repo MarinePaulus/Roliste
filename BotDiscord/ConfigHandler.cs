@@ -23,7 +23,7 @@ namespace BotDiscord
         {
             conf = new Config()
             {
-                token = "Njk0NTkxMDIzODc1MDk2NTg2.XoN2kQ.qfhIp24UsstbgX9M2R3Qi7MU_NI"
+                token = token;
             };
         }
 
