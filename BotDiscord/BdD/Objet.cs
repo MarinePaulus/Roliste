@@ -13,6 +13,7 @@ namespace BotDiscord.BdD
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int idobjet { get; set; }
 
+        [Required]
         public int idjeu { get; set; }
 
         [Required]
@@ -26,6 +27,7 @@ namespace BotDiscord.BdD
         [StringLength(50)]
         public string effetobjet { get; set; }
 
+        [Required]
         public int rareteobjet { get; set; }
 
         [StringLength(50)]
@@ -45,6 +47,8 @@ namespace BotDiscord.BdD
         public int nbmalus2 { get; set; }
 
         public int typemalus2 { get; set; }
+
+        public float poidsobjet { get; set; }
 
         public virtual Jeux jeux { get; set; }
     }

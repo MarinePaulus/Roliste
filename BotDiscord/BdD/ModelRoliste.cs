@@ -1,10 +1,16 @@
 namespace BotDiscord.BdD
 {
+    using System;
     using System.Data.Entity;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
 
     public partial class ModelRoliste : DbContext
     {
-        public ModelRoliste() : base("name=ModelRoliste") { }
+        public ModelRoliste()
+            : base("name=ModelRoliste")
+        {
+        }
 
         public virtual DbSet<Caracteristique> Caracteristique { get; set; }
         public virtual DbSet<Classe> Classe { get; set; }
@@ -146,10 +152,6 @@ namespace BotDiscord.BdD
 
             modelBuilder.Entity<Objet>()
                 .Property(e => e.typebonus2)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<Personne>()
-                .Property(e => e.nomperso)
                 .IsUnicode(false);
 
             modelBuilder.Entity<Personne>()

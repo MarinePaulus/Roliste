@@ -1,5 +1,4 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using System;
 using System.Threading.Tasks;
 
@@ -7,23 +6,25 @@ namespace BotDiscord.Modules
 {
     public class InfoModule : ModuleBase<SocketCommandContext>
     {
-        // !say hello world -> hello world
         [Command("say")]
-        [Summary("Echoes a message.")]
-        public Task Say([Remainder] [Summary("The text to echo")] string echo)
+        public Task Say([Remainder] string echo)
             => ReplyAsync(echo);
 
         [Command("ping")]
-        [Summary("Ping pong !")]
         public async Task Ping()
         {
             await Context.Channel.SendMessageAsync("pong!");
         }
 
+        [Command("pong")]
+        public async Task Pong()
+        {
+            await Context.Channel.SendMessageAsync("ping!");
+        }
+
         [Command("roll")]
 		[Alias("r")]
-        [Summary("Rolling dices")]
-        public async Task RollAsync([Remainder] [Summary("Type of dices to roll")] string roll)
+        public async Task RollAsync([Remainder] string roll)
         { // xdx // xdx+x // xdx+xdx 
             string retour = "";
             string[] dices = roll.Split('+'); // Récup les =/= types de dés
@@ -54,13 +55,13 @@ namespace BotDiscord.Modules
         }
 
         [Command("whoiam")]
-        [Summary("Who I am?")]
         public async Task WhoIam()
         {
-            ulong id = 595719586062532638;
-            IUser user = await Context.Channel.GetUserAsync(id);
-            //String str = " ID : " + Context.User.Id + ", pseudo : " + Context.User.ToString();
-            String str = " ID : " + user.Id + ", pseudo : " + user.ToString();
+//            ulong id = X;
+//            IUser user = await Context.Channel.GetUserAsync(id);
+//            String str = " ID : " + user.Id + ", pseudo : " + user.ToString();
+            String str = "Pseudo : " + Context.User.ToString();
+            
             await Context.Channel.SendMessageAsync(str);
         }
     }

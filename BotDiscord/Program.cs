@@ -36,7 +36,7 @@ namespace BotDiscord
                 .BuildServiceProvider();
 
             await commands.AddModuleAsync<InfoModule>(service);
-            await client.LoginAsync(TokenType.Bot, "Njk0NTkxMDIzODc1MDk2NTg2.XoN2kQ.qfhIp24UsstbgX9M2R3Qi7MU_NI");
+            await client.LoginAsync(TokenType.Bot, "Njk0NTkxMDIzODc1MDk2NTg2.XpYnfA.W3eyT7ShdJAaRxmTRes1tb4y_VA");
             await client.StartAsync();
 
             await Task.Delay(-1);

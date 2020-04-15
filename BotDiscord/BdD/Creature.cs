@@ -15,7 +15,7 @@ namespace BotDiscord.BdD
 
         public int idjeu { get; set; }
 
-        public int idjoueur { get; set; }
+        public long idjoueur { get; set; }
 
         [Required]
         [StringLength(50)]
