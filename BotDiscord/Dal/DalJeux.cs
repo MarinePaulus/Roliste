@@ -14,44 +14,40 @@ namespace BotDiscord.Dal
             bdd = new ModelRoliste();
         }
           
-        public bool AddJeu(string nom, Personne mj)
+        public int AddJeu(Jeux jeu)
         {
-            try
-            {
-                Jeux jeux = bdd.Jeux.FirstOrDefault(jeu => jeu.nomjeux == nom && jeu.idmj == mj.idperso);
+            try {
+                Jeux jeux = bdd.Jeux.FirstOrDefault(j => j.nomjeux == jeu.nomjeux && j.idmj == jeu.idmj);
                 if (jeux == null) {
-                    bdd.Jeux.Add(new Jeux { nomjeux=nom, idmj=mj.idperso});
+                    bdd.Jeux.Add(jeu);
                     bdd.SaveChanges();
-                    return true;
-                } else { Console.WriteLine("Le Jeu existe déjà, impossible de la rajouter."); return false; }
-            } catch (Exception e) { Console.WriteLine(e.Message); return false; }
+                    Jeux jx = bdd.Jeux.FirstOrDefault(j => j.nomjeux == jeu.nomjeux && j.idmj == jeu.idmj);
+                    return jx.idjeux;
+                } else { Console.WriteLine("Le jeu existe déjà, impossible de le rajouter."); return 0; }
+            } catch (Exception e) { Console.WriteLine(e.Message); return 0; }
         }
-        public bool UpJeu(string nom, Personne mj, string newnom, Personne newmj)
+        public bool UpJeu(Jeux jeu)
         {
-            try
-            {
-                Jeux jeux = bdd.Jeux.FirstOrDefault(jeu => jeu.nomjeux == nom && jeu.idmj == mj.idperso);
+            try {
+                Jeux jeux = bdd.Jeux.FirstOrDefault(j => j.idjeux == jeu.idjeux);
                 if (jeux != null) {
-                    if(newnom != null)  jeux.nomjeux = newnom;
-                    if(newmj != null) jeux.idmj = newmj.idperso;
                     bdd.SaveChanges();
                     return true;
-                } else { Console.WriteLine("Le Jeu n'existe pas, impossible de le modifier."); return false; }
+                } else { Console.WriteLine("Le jeu n'existe pas, impossible de le modifier."); return false; }
             } catch (Exception e) { Console.WriteLine(e.Message); return false; }
         }
-        public bool DelJeu(string nom, Personne mj)
+        public bool DelJeu(Jeux jeu)
         {
-            try
-            {
-                Jeux jeux = bdd.Jeux.FirstOrDefault(jeu => jeu.nomjeux == nom && jeu.idmj == mj.idperso);
+            try {
+                Jeux jeux = bdd.Jeux.FirstOrDefault(j => j.idjeux == jeu.idjeux);
                 if (jeux != null) {
                     bdd.Jeux.Remove(jeux);
                     bdd.SaveChanges();
                     return true;
-                } else { Console.WriteLine("Le Jeu n'existe pas, impossible de la supprimer."); return false; }
+                } else { Console.WriteLine("Le jeu n'existe pas, impossible de le supprimer."); return false; }
             } catch (Exception e) { Console.WriteLine(e.Message); return false; }
         }
-        public Jeux GetJeu(string nom, Personne mj) => bdd.Jeux.FirstOrDefault(jeu => jeu.nomjeux == nom && jeu.idmj == mj.idperso);
+        public Jeux GetJeu(Jeux jeu) => bdd.Jeux.FirstOrDefault(j => j.nomjeux == jeu.nomjeux && j.idmj == jeu.idmj);
         public List<Jeux> GetAllJeuxMJ(Personne mj) => bdd.Jeux.ToList().FindAll(jeu => jeu.idmj == mj.idperso);
         public List<Jeux> GetAllJeux() => bdd.Jeux.ToList();
 
