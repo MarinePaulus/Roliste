@@ -14,23 +14,23 @@ namespace BotDiscord.Dal
             bdd = new ModelRoliste();
         }
 
-        public bool AddPerso(ulong id)
+        public long AddPerso(Personne personne)
         {
             try
             {
-                Personne perso = bdd.Personne.FirstOrDefault(pe => pe.idperso == (long)id);
+                Personne perso = bdd.Personne.FirstOrDefault(pe => pe.idperso == personne.idperso);
                 if (perso == null) {
-                    bdd.Personne.Add(new Personne { idperso = (long)id });
+                    bdd.Personne.Add(personne);
                     bdd.SaveChanges();
-                    return true;
-                } else { Console.WriteLine("La Personne existe déjà, impossible de la rajouter."); return false; }
-            } catch (Exception e) { Console.WriteLine(e.Message); return false; }
+                    return personne.idperso;
+                } else { Console.WriteLine("La Personne existe déjà, impossible de la rajouter."); return 0; }
+            } catch (Exception e) { Console.WriteLine(e.Message); return 0; }
         }
-        public bool DelPerso(ulong id)
+        public bool DelPerso(Personne personne)
         {
             try
             {
-                Personne perso = bdd.Personne.FirstOrDefault(pe => pe.idperso == (long)id);
+                Personne perso = bdd.Personne.FirstOrDefault(pe => pe.idperso == personne.idperso);
                 if (perso != null) {
                     bdd.Personne.Remove(perso);
                     bdd.SaveChanges();
@@ -39,7 +39,7 @@ namespace BotDiscord.Dal
             }
             catch (Exception e) { Console.WriteLine(e.Message); return false; }
         }
-        public Personne GetPerso(ulong id) => bdd.Personne.FirstOrDefault(pe => pe.idperso == (long)id);
+        public Personne GetPerso(Personne personne) => bdd.Personne.FirstOrDefault(pe => pe.idperso == personne.idperso);
         public List<Personne> GetAllPerso() => bdd.Personne.ToList();
 
         public void Dispose()
