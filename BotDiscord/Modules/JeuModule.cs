@@ -1,12 +1,7 @@
-﻿using BotDiscord.BdD;
-using BotDiscord.Dal;
+using BotDiscord.BdD;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BotDiscord.Modules
@@ -14,39 +9,27 @@ namespace BotDiscord.Modules
     class JeuModule : ModuleBase<SocketCommandContext>
     {
         [Command("addjeu")]
-        public async Task AddJeu([Remainder] string nom)
+        public async Task AddJeu(string nom)
         {
-            DalJeux jeu = new DalJeux();
-            DalPersonne perso = new DalPersonne();
-            Personne pe = perso.GetPerso(Context.User.Id);
-            bool ok = false;
-
-            if (pe == null) {
-                perso.AddPerso(Context.User.Id);
-                ok = jeu.AddJeu(nom, perso.GetPerso(Context.User.Id));
-            } else
-                ok = jeu.AddJeu(nom, pe);
-
-            if (ok)
+            Jeux jeu = new Jeux() { nomjeux = nom};
+            int ok = jeu.AddJeu(Context.User.Id);
+            if (ok != 0)
                 await Context.Channel.SendMessageAsync("Jeu enregistré avec succès.");
             else
                 await Context.Channel.SendMessageAsync("Jeu non enregistré, une erreur s'est produite.");
         }
 
         [Command("upjeu")]
-        public async Task UpJeu([Remainder] string nom, [Remainder] string newnom, IUser newmj)
+        public async Task UpJeu(string nom, string newnom, IUser newmj = null)
         {
-            DalJeux jeu = new DalJeux();
-            DalPersonne perso = new DalPersonne();
-            Personne pe = perso.GetPerso(newmj.Id);
-            bool ok = false;
+            // Info pour récup le jeu
+            Jeux jeu = new Jeux() { nomjeux = nom, idmj = (long)Context.User.Id };
+            jeu = jeu.GetJeu();
 
-            if (pe == null)
-            {
-                perso.AddPerso(Context.User.Id);
-                ok = jeu.UpJeu(nom, perso.GetPerso(Context.User.Id), newnom, pe);
-            }
-            
+            // Modification des infos
+            if (newmj != null) jeu.idmj = (long)newmj.Id;
+            jeu.nomjeux = newnom;
+            bool ok = jeu.UpJeu();
 
             if (ok)
                 await Context.Channel.SendMessageAsync("Jeu modifié avec succès.");
@@ -55,11 +38,11 @@ namespace BotDiscord.Modules
         }
 
         [Command("deljeu")]
-        public async Task DelJeu([Remainder] string nom)
+        public async Task DelJeu(string nom)
         {
-            DalJeux jeu = new DalJeux();
-            DalPersonne perso = new DalPersonne();
-            bool ok = jeu.DelJeu(nom, perso.GetPerso(Context.User.Id));
+            Jeux jeu = new Jeux { nomjeux = nom, idmj = (long)Context.User.Id };
+            jeu = jeu.GetJeu();
+            bool ok = jeu.DelJeu();
 
             if (ok)
                 await Context.Channel.SendMessageAsync("Jeu supprimé avec succès.");
@@ -67,28 +50,32 @@ namespace BotDiscord.Modules
                 await Context.Channel.SendMessageAsync("Jeu non supprimé, une erreur s'est produite.");
         }
 
-        [Command("onejeu")]
-        public async Task GetJeux([Remainder] string nom)
+        [Command("getjeu")]
+        public async Task GetJeux(string nom)
         {
-            DalJeux jeu = new DalJeux();
-            Jeux p = null;
-            IEnumerable emu = await Context.Channel.GetUsersAsync().FlattenAsync();
+            Personne perso = new Personne() { idperso = (long)Context.User.Id };
+            perso = perso.GetPerso();
+            Jeux jeu = new Jeux() { nomjeux = nom, Maitre = perso, idmj = perso.idperso };
+            jeu = jeu.GetJeu();
 
-            foreach (Object o in emu)
-                if (o.ToString().Contains(jeu.ToString())) p = jeu.GetJeu(nom jeu.Id);
-
-            if (p != null)
-                await Context.Channel.SendMessageAsync(Context.Channel.GetUserAsync((ulong)p.idjeu).Result.ToString());
+            if (jeu != null)
+                await Context.Channel.SendMessageAsync("Nom du jeu : " + jeu.nomjeux + ", Maitre du Jeu : " + Context.User.Username);
             else
-                await Context.Channel.SendMessageAsync("Cet utilisateur n'est pas un rôliste.");
+                await Context.Channel.SendMessageAsync("Le Jeu n'existe pas pour ce MJ.");
         }
 
-        [Command("listjeu")]
-        public async Task ListJeux()
+        [Command("lstjeux")]
+        public async Task ListJeuxMJ(IUser user = null)
         {
-            DalJeux jeu = new DalJeux();
-            List<Jeux> lstJeux = jeu.GetAllJeux();
-            string str = null;
+            Personne perso = new Personne();
+            if (user == null)
+                perso.idperso = (long)Context.User.Id;
+            else
+                perso.idperso = (long)user.Id;
+
+            string str = "Le MJ " + Context.Channel.GetUserAsync((ulong)perso.idperso).Result.Username + " possède les jeux suivants:\n";
+            Jeux jeu = new Jeux() { Maitre = perso.GetPerso() };
+            List<Jeux> lstJeux = jeu.GetAllJeuxMJ();
 
             foreach (Jeux p in lstJeux)
                 str += p.nomjeux + "\n";
@@ -96,7 +83,23 @@ namespace BotDiscord.Modules
             if (str != null)
                 await Context.Channel.SendMessageAsync(str);
             else
-                await Context.Channel.SendMessageAsync("Il n'y a pas de rôlistes dans la liste...");
+                await Context.Channel.SendMessageAsync("Il n'y a pas de Jeux dans la liste de ce rôliste...");
+        }
+
+        [Command("lstalljeux")]
+        public async Task ListAllJeux()
+        {
+            Jeux jeu = new Jeux();
+            List<Jeux> lstJeux = jeu.GetAllJeux();
+            string str = null;
+
+            foreach (Jeux p in lstJeux)
+                str += p.nomjeux + "\n" + "\t" + "Le MJ est " + Context.Channel.GetUserAsync((ulong)p.Maitre.idperso).Result.Username + "\n";
+
+            if (str != null)
+                await Context.Channel.SendMessageAsync(str);
+            else
+                await Context.Channel.SendMessageAsync("Il n'y a pas de Jeux dans la liste...");
         }
     }
 }
