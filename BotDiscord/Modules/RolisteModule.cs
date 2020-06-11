@@ -1,9 +1,6 @@
-﻿using BotDiscord.BdD;
-using BotDiscord.Dal;
+using BotDiscord.BdD;
 using Discord;
 using Discord.Commands;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,10 +11,15 @@ namespace BotDiscord.Modules
         [Command("add")]
         public async Task AddPerso([Remainder] IUser user = null)
         {
-            DalPersonne perso = new DalPersonne();
-            bool ok = (user == null) ? perso.AddPerso(Context.User.Id) : perso.AddPerso(user.Id);
+            Personne perso = new Personne();
+            if (user == null)
+                perso.idperso = (long)Context.User.Id;
+            else
+                perso.idperso = (long)user.Id;
 
-            if (ok)
+            long ok = perso.AddPerso();
+
+            if (ok != 0)
                 await Context.Channel.SendMessageAsync("Utilisateur enregistré avec succès.");
             else
                 await Context.Channel.SendMessageAsync("Utilisateur non enregistré, une erreur s'est produite.");
@@ -26,8 +28,8 @@ namespace BotDiscord.Modules
         [Command("del")]
         public async Task DelPerso([Remainder] IUser user)
         {
-            DalPersonne perso = new DalPersonne();
-            bool ok = perso.DelPerso(user.Id);
+            Personne perso = new Personne() { idperso = (long)user.Id };
+            bool ok = perso.DelPerso();
 
             if (ok)
                 await Context.Channel.SendMessageAsync("Utilisateur supprimé avec succès.");
@@ -35,18 +37,23 @@ namespace BotDiscord.Modules
                 await Context.Channel.SendMessageAsync("Utilisateur non supprimé, une erreur s'est produite.");
         }
 
-        [Command("one")]
+        [Command("get")]
         public async Task GetPerso([Remainder] IUser user)
         {
-            DalPersonne perso = new DalPersonne();
-            Personne p = null;
-            IEnumerable emu = await Context.Channel.GetUsersAsync().FlattenAsync();
-
-            foreach (Object o in emu)
-                if (o.ToString().Contains(user.ToString())) p = perso.GetPerso(user.Id);
+            Personne perso = new Personne() { idperso = (long)user.Id };
+            perso = perso.GetPerso();
+            Jeux jeu = new Jeux() { Maitre = perso};
+            List<Jeux> jeux = jeu.GetAllJeuxMJ();
             
-            if (p != null)
-                await Context.Channel.SendMessageAsync(Context.Channel.GetUserAsync((ulong)p.idperso).Result.ToString());
+            if (perso != null)
+                if (jeux != null)
+                    await Context.Channel.SendMessageAsync(
+                        Context.Channel.GetUserAsync((ulong)perso.idperso).Result.ToString()
+                        + " est Maître de Jeu. Faites !lstjeux @" 
+                        + Context.Channel.GetUserAsync((ulong)perso.idperso).Result.Username 
+                        + " pour voir la liste de ses jeux.");
+                else
+                    await Context.Channel.SendMessageAsync(Context.Channel.GetUserAsync((ulong)perso.idperso).Result.ToString() + "n'est pas Maître de Jeu.");
             else
                 await Context.Channel.SendMessageAsync("Cet utilisateur n'est pas un rôliste.");
         }
@@ -54,7 +61,7 @@ namespace BotDiscord.Modules
         [Command("list")]
         public async Task ListPerso()
         {
-            DalPersonne perso = new DalPersonne();
+            Personne perso = new Personne();
             List<Personne> lstPerso = perso.GetAllPerso();
             string str = null;
 
